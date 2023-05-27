@@ -1,0 +1,35 @@
+version: '3'
+services:
+  frontend:
+    image: index.docker.io/prashrex/react_frontend
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    expose:
+      - 3000
+
+    depends_on:
+      - watchtower
+
+  backend:
+    image: index.docker.io/prashrex/react_backend
+    build: 
+      context: ./backend
+      dockerfile: ./Dockerfile
+    restart: always
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+    depends_on:
+      - watchtower
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    command: --interval 30
