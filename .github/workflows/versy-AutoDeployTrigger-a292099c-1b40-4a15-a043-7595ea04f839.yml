@@ -1,0 +1,42 @@
+name: Trigger auto deployment for versy
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - 'Dockefile/**'
+    - '.github/workflows/versy-AutoDeployTrigger-a292099c-1b40-4a15-a043-7595ea04f839.yml'
+
+  # Allow mannually trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.VERSY_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }}/Dockefile 
+          registryUrl: versys.azurecr.io
+          registryUsername: ${{ secrets.VERSY_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.VERSY_REGISTRY_PASSWORD }}
+          containerAppName: versy
+          resourceGroup: versys
+          imageToBuild: versys.azurecr.io/frontend:${{ github.sha }}
+          dockerfilePath: Dockerfile
+
+     
+
